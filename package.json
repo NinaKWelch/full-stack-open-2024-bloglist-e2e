@@ -1,0 +1,17 @@
+{
+  "name": "full-stack-open-2024-bloglist-e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.13.1"
+  }
+}
