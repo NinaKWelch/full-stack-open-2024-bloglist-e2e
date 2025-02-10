@@ -59,9 +59,31 @@ describe('Blog app', () => {
     })
   
     test('a new blog can be created', async ({ page }) => {
-      await createBlog(page, 'test blog title', 'test blog author', 'test blog url')
+      await createBlog(page, 'first title', 'first author', 'first url')
 
-      await expect(page.getByText('test blog title, by test blog author')).toBeVisible()
+      await expect(page.getByText('first title, by first author')).toBeVisible()
     })
+
+    describe('and a blog exists', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'second title', 'second author', 'second url')
+      })
+
+      test('a blog can be liked', async ({ page }) => {
+        const blog = page.getByText('second title, by second author')
+        const showButton = blog.getByRole('button', { name: 'show' })
+        const likes = blog.locator('..').getByText('likes')
+        const likeButton = likes.getByRole('button', { name: 'like' })
+
+        await showButton.click()
+        
+        await expect(likes).toBeVisible()
+        await expect(likeButton).toBeVisible()
+
+        await likeButton.click()
+
+        await expect(likes).toContainText('1')
+      })  
+    })  
   })
 })
