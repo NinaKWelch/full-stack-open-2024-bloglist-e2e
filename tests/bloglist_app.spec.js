@@ -101,7 +101,7 @@ describe('Blog app', () => {
       const content = 'third title, by third author'
 
       beforeEach(async ({ page }) => {
-        await createBlog(page, 'third title', 'third author', 'third url', content)
+        await createBlog(page, 'third title', 'third author', 'https://third.com', content)
       })
 
       test('a blog can be liked', async ({ page }) => {
@@ -134,8 +134,8 @@ describe('Blog app', () => {
 
         await logoutButton.click()
 
-        expect(heading).toBeVisible()
-        expect(loginButton).toBeVisible()
+        await expect(heading).toBeVisible()
+        await expect(loginButton).toBeVisible()
 
         await loginButton.click()
 
@@ -155,6 +155,60 @@ describe('Blog app', () => {
 
         await expect(blogCreator).toBeVisible()
         await expect(deleteButton).not.toBeVisible()
+      })
+    })
+
+    describe('and several blogs exists', () => {
+      const contentA = 'forth title, by forth author'
+      const contentB = 'fifth title, by fifth author'
+      const contentC = 'sixth title, by sixth author'
+
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'forth title', 'forth author', 'https://forth.com', contentA)
+        await createBlog(page, 'fifth title', 'fifth author', 'https://fifth.com', contentB)
+        await createBlog(page, 'sixth title', 'sixth author', 'https://sixth.com', contentC)
+      })
+
+      test('blogs are ordered by likes', async ({ page }) => {
+        const blogs = page.getByTestId('blogs').locator('div')
+        const showButtons = page.getByRole('button', { name: 'show' })
+        const successMessage = page.locator('.success')
+        const likes = page.getByText('likes')
+        const likeButton = likes.getByRole('button', { name: 'like' })
+        const hideButton = page.getByRole('button', { name: 'hide' }) 
+
+        await expect(blogs.locator('nth=0')).toContainText(contentA)
+
+        await showButtons.locator('nth=1').click()
+
+        await expect(likes).toBeVisible()
+        await expect(likes).toContainText('0')
+        await expect(likeButton).toBeVisible()
+        await expect(hideButton).toBeVisible()
+
+        await likeButton.click()
+
+        await expect(likes).toContainText('1')
+        await expect(successMessage).toBeVisible()
+        await expect(successMessage).toContainText('Liked fifth title')
+
+        await expect(blogs.locator('nth=0')).toContainText(contentB)
+
+        await hideButton.click()
+        await showButtons.locator('nth=2').click()
+
+        await expect(likes).toBeVisible()
+        await expect(likes).toContainText('0')
+        await expect(likeButton).toBeVisible()
+
+        await likeButton.click()
+
+        await expect(likes).toContainText('1')
+        
+        await likeButton.click()
+
+        await expect(likes).toContainText('2')
+        await expect(blogs.locator('nth=0')).toContainText(contentC)
       })
     })  
   })
